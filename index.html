@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Number Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .calculator-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: white;
+            appearance: none;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .select-wrapper {
+            position: relative;
+        }
+        
+        .select-wrapper::after {
+            content: '\\25BC';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #666;
+        }
+        
+        .operations {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 500;
+            min-height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .result.loading {
+            background: #f8f9fa;
+            color: #666;
+        }
+        
+        .scale-info {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+        }
+        
+        @media (max-width: 480px) {
+            .calculator-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .operations {
+                grid-template-columns: 1fr;
+            }
+            
+            button {
+                padding: 12px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>Big Number Calculator</h1>
+        
+        <div class="form-group">
+            <label for="firstNumber">First Number:</label>
+            <input type="number" id="firstNumber" placeholder="Enter a number" min="0" step="any">
+        </div>
+        
+        <div class="form-group">
+            <label for="firstScale">Scale:</label>
+            <div class="select-wrapper">
+                <select id="firstScale">
+                    <option value="1">As-is</option>
+                    <option value="1000">Thousand</option>
+                    <option value="1000000">Million</option>
+                    <option value="1000000000">Billion</option>
+                    <option value="1000000000000">Trillion</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="operations">
+            <button id="multiplyBtn">Multiply (×)</button>
+            <button id="divideBtn">Divide (÷)</button>
+        </div>
+        
+        <div class="form-group">
+            <label for="secondNumber">Second Number:</label>
+            <input type="number" id="secondNumber" placeholder="Enter a number" min="0" step="any">
+        </div>
+        
+        <div class="form-group">
+            <label for="secondScale">Scale:</label>
+            <div class="select-wrapper">
+                <select id="secondScale">
+                    <option value="1">As-is</option>
+                    <option value="1000">Thousand</option>
+                    <option value="1000000">Million</option>
+                    <option value="1000000000">Billion</option>
+                    <option value="1000000000000">Trillion</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="result" id="result">Enter numbers and select an operation</div>
+        
+        <div class="scale-info">
+            Tip: Use this calculator to easily work with large numbers like millions, billions, and trillions
+        </div>
+    </div>
+
+    <script>
+        // Scale multipliers
+        const SCALES = {
+            1: 1,
+            1000: 1000,
+            1000000: 1000000,
+            1000000000: 1000000000,
+            1000000000000: 1000000000000
+        };
+
+        // Scale names for display
+        const SCALE_NAMES = {
+            1: '',
+            1000: 'thousand',
+            1000000: 'million',
+            1000000000: 'billion',
+            1000000000000: 'trillion'
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstNumberInput = document.getElementById('firstNumber');
+            const firstScaleSelect = document.getElementById('firstScale');
+            const secondNumberInput = document.getElementById('secondNumber');
+            const secondScaleSelect = document.getElementById('secondScale');
+            const multiplyBtn = document.getElementById('multiplyBtn');
+            const divideBtn = document.getElementById('divideBtn');
+            const resultDiv = document.getElementById('result');
+
+            function getScaledValue(numberInput, scaleSelect) {
+                const number = parseFloat(numberInput.value) || 0;
+                const scale = parseInt(scaleSelect.value);
+                return number * scale;
+            }
+
+            function formatResult(value) {
+                if (isNaN(value) || !isFinite(value)) {
+                    return 'Invalid result';
+                }
+
+                // Handle zero
+                if (value === 0) {
+                    return '0';
+                }
+
+                // Determine appropriate scale
+                const absValue = Math.abs(value);
+                let scale = 1;
+                let scaleName = '';
+
+                if (absValue >= 1000000000000) {
+                    scale = 1000000000000;
+                    scaleName = 'trillion';
+                } else if (absValue >= 1000000000) {
+                    scale = 1000000000;
+                    scaleName = 'billion';
+                } else if (absValue >= 1000000) {
+                    scale = 1000000;
+                    scaleName = 'million';
+                } else if (absValue >= 1000) {
+                    scale = 1000;
+                    scaleName = 'thousand';
+                }
+
+                const scaledValue = value / scale;
+                
+                // Format to avoid too many decimal places
+                let formattedValue;
+                if (scaledValue >= 100 || scaledValue < 0.01) {
+                    formattedValue = scaledValue.toLocaleString(undefined, {maximumSignificantDigits: 4});
+                } else {
+                    formattedValue = scaledValue.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 2});
+                }
+
+                return `${formattedValue} ${scaleName}`.trim();
+            }
+
+            function calculate(operation) {
+                try {
+                    // Show loading state
+                    resultDiv.textContent = 'Calculating...';
+                    resultDiv.classList.add('loading');
+
+                    // Small delay for UX
+                    setTimeout(() => {
+                        const firstValue = getScaledValue(firstNumberInput, firstScaleSelect);
+                        const secondValue = getScaledValue(secondNumberInput, secondScaleSelect);
+                        
+                        let result;
+                        if (operation === 'multiply') {
+                            result = firstValue * secondValue;
+                        } else if (operation === 'divide') {
+                            if (secondValue === 0) {
+                                throw new Error('Cannot divide by zero');
+                            }
+                            result = firstValue / secondValue;
+                        }
+                        
+                        resultDiv.textContent = formatResult(result);
+                        resultDiv.classList.remove('loading');
+                    }, 300);
+                } catch (error) {
+                    resultDiv.textContent = `Error: ${error.message}`;
+                    resultDiv.classList.remove('loading');
+                }
+            }
+
+            // Event listeners
+            multiplyBtn.addEventListener('click', () => calculate('multiply'));
+            divideBtn.addEventListener('click', () => calculate('divide'));
+
+            // Allow Enter key to trigger calculation
+            [firstNumberInput, secondNumberInput].forEach(input => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const activeElement = document.activeElement;
+                        if (activeElement === multiplyBtn) {
+                            calculate('multiply');
+                        } else if (activeElement === divideBtn) {
+                            calculate('divide');
+                        } else {
+                            calculate('multiply'); // Default
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
