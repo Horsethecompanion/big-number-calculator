@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Big Number Calculator</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>">
+<style>
+:root {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --text-light: #64748b;
+  --border: #e2e8f0;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-light: #eff6ff;
+  --success-bg: #f0fdf4;
+  --success-text: #166534;
+  --amber: #d97706;
+  --amber-bg: #fffbeb;
+  --amber-border: #fde68a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+}
+
+.container {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.page-header {
+  margin-bottom: 1.5rem;
+}
+.page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+.page-header p {
+  color: var(--text-light);
+  font-size: 0.875rem;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+
+.section-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-light);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+/* ── Simplify box ── */
+.simplify-input-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.simplify-input-row input {
+  flex: 1;
+  min-width: 180px;
+  padding: 0.6rem 0.9rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--bg);
+  color: var(--text);
+}
+.simplify-input-row input:focus { border-color: var(--accent); }
+.simplify-input-row input::placeholder { color: #cbd5e1; font-weight: 400; font-size: 0.9rem; }
+
+.simplify-result {
+  margin-top: 0.6rem;
+  min-height: 1.4rem;
+  font-size: 0.9rem;
+  color: var(--text-light);
+}
+.simplify-result .big {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: 'Courier New', monospace;
+}
+.simplify-result .full {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin-top: 0.15rem;
+}
+
+/* ── Calculator ── */
+.calc-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.field-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-light);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+.num-input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--bg);
+  color: var(--text);
+}
+.num-input:focus { border-color: var(--accent); }
+.num-input::placeholder { color: #cbd5e1; font-weight: 400; font-size: 0.85rem; font-family: inherit; }
+
+.scale-select {
+  width: 100%;
+  margin-top: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  background: var(--bg);
+  color: var(--text-light);
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.scale-select:focus { border-color: var(--accent); }
+
+.field-readout {
+  font-size: 0.78rem;
+  color: var(--accent);
+  margin-top: 0.3rem;
+  min-height: 1.1rem;
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+}
+
+/* ── Op buttons ── */
+.op-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding-top: 1.6rem;
+  align-items: center;
+}
+.op-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--text-light);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.op-btn:hover { background: var(--bg); border-color: #94a3b8; color: var(--text); }
+.op-btn.selected {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* ── Error ── */
+.error-line {
+  font-size: 0.8rem;
+  color: #dc2626;
+  min-height: 1.2rem;
+  margin-top: 0.5rem;
+}
+
+/* ── Result card ── */
+.result-card {
+  background: #0f172a;
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.result-card .rl {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  margin-bottom: 0.35rem;
+}
+.result-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: 'Courier New', monospace;
+  line-height: 1.1;
+  word-break: break-all;
+}
+.result-words {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 0.2rem;
+  font-family: 'Courier New', monospace;
+}
+.result-placeholder {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #334155;
+  font-family: 'Courier New', monospace;
+}
+
+/* ── Context card ── */
+.context-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 1.5rem 1.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+  min-height: 90px;
+}
+.ctx-label-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+.ctx-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+.ctx-dot.live { background: var(--amber); }
+.ctx-label-row .section-label { margin-bottom: 0; }
+.ctx-text {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.7;
+}
+.ctx-empty {
+  font-size: 0.875rem;
+  color: var(--text-light);
+  font-style: italic;
+}
+.ctx-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+.ctx-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+.ctx-emoji {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  line-height: 1.3;
+}
+.ctx-ps {
+  margin-top: 0.65rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.8rem;
+  color: var(--text-light);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+/* ── Divider ── */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.25rem 0;
+}
+
+/* ── Footer ── */
+footer {
+  margin-top: 2rem;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+}
+footer a { color: #94a3b8; text-decoration: none; }
+footer a:hover { color: var(--text-light); }
+
+@media (max-width: 500px) {
+  .calc-grid { grid-template-columns: 1fr; }
+  .op-col { flex-direction: row; padding-top: 0; justify-content: center; }
+  .result-number { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="page-header">
+    <h1>🔢 Big Number Calculator</h1>
+    <p>Work with large numbers — and actually feel their scale.</p>
+  </div>
+
+  <!-- Simplify box -->
+  <div class="card">
+    <div class="section-label">Simplify a number</div>
+    <div class="simplify-input-row">
+      <input type="text" id="snap" placeholder='e.g. 1000000 or "6 billion"' autocomplete="off" spellcheck="false" />
+    </div>
+    <div class="simplify-result" id="snap-rd"></div>
+  </div>
+
+  <hr class="divider" style="margin: 0.25rem 0 1rem;">
+
+  <!-- Calculator -->
+  <div class="card">
+    <div class="section-label">Calculate</div>
+
+    <div class="calc-grid">
+      <!-- Left number -->
+      <div>
+        <label class="field-label" for="n1">First number</label>
+        <input class="num-input" type="text" id="n1" placeholder='e.g. 7.8 or "5 million"' autocomplete="off" spellcheck="false" />
+        <select class="scale-select" id="s1" tabindex="-1">
+          <option value="1">× 1 — as-is</option>
+          <option value="1e3">× 1,000 — thousands</option>
+          <option value="1e6">× 1,000,000 — millions</option>
+          <option value="1e9">× 1,000,000,000 — billions</option>
+          <option value="1e12">× 10¹² — trillions</option>
+          <option value="1e15">× 10¹⁵ — quadrillions</option>
+        </select>
+        <div class="field-readout" id="r1"></div>
+      </div>
+
+      <!-- Op buttons -->
+      <div class="op-col" role="group" aria-label="Operation">
+        <button class="op-btn selected" id="bm" aria-pressed="true" title="Multiply" tabindex="-1">×</button>
+        <button class="op-btn" id="bd" aria-pressed="false" title="Divide" tabindex="-1">÷</button>
+        <button class="op-btn" id="ba" aria-pressed="false" title="Add" tabindex="-1">+</button>
+        <button class="op-btn" id="bs" aria-pressed="false" title="Subtract" tabindex="-1">−</button>
+        <button class="op-btn" id="bp" aria-pressed="false" title="Percentage of" tabindex="-1">%</button>
+      </div>
+
+      <!-- Right number -->
+      <div>
+        <label class="field-label" for="n2">Second number</label>
+        <input class="num-input" type="text" id="n2" placeholder='e.g. 52 or "3 trillion"' autocomplete="off" spellcheck="false" />
+        <select class="scale-select" id="s2" tabindex="-1">
+          <option value="1">× 1 — as-is</option>
+          <option value="1e3">× 1,000 — thousands</option>
+          <option value="1e6">× 1,000,000 — millions</option>
+          <option value="1e9">× 1,000,000,000 — billions</option>
+          <option value="1e12">× 10¹² — trillions</option>
+          <option value="1e15">× 10¹⁵ — quadrillions</option>
+        </select>
+        <div class="field-readout" id="r2"></div>
+      </div>
+    </div>
+
+    <div class="error-line" id="err" role="alert" aria-live="assertive"></div>
+  </div>
+
+  <!-- Result -->
+  <div class="result-card">
+    <div>
+      <div class="rl">Result</div>
+      <div id="res-num" class="result-placeholder">—</div>
+      <div id="res-words" class="result-words"></div>
+    </div>
+  </div>
+
+  <!-- Context -->
+  <div class="context-card">
+    <div class="ctx-label-row">
+      <span class="ctx-dot" id="ctx-dot"></span>
+      <span class="section-label">Human-scale context</span>
+    </div>
+    <div class="ctx-text" id="ctx-text">
+      <span class="ctx-empty">Enter numbers above to see a real-world comparison.</span>
+    </div>
+  </div>
+
+  <footer>
+    <a href="https://horsethecompanion.github.io">horsethecompanion.github.io</a>
+  </footer>
+
+</div>
+
+<script>
+(function () {
+
+  /* ── Number parsing ── */
+  const WORDS = {
+    thousand:1e3, thousands:1e3, k:1e3,
+    million:1e6, millions:1e6, m:1e6,
+    billion:1e9, billions:1e9, b:1e9,
+    trillion:1e12, trillions:1e12, t:1e12,
+    quadrillion:1e15, quadrillions:1e15,
+    quintillion:1e18, quintillions:1e18,
+    sextillion:1e21, septillion:1e24
+  };
+
+  function parseNum(s) {
+    if (!s || !s.trim()) return null;
+    s = s.trim().replace(/,/g, '');
+    const direct = parseFloat(s);
+    if (!isNaN(direct) && !/[a-z]/i.test(s)) return direct;
+    const m = s.match(/^([+-]?\s*[\d.]+)\s*([a-z]+)$/i);
+    if (m) {
+      const base = parseFloat(m[1].replace(/\s/g, ''));
+      const word = m[2].toLowerCase();
+      if (!isNaN(base) && WORDS[word]) return base * WORDS[word];
+    }
+    return null;
+  }
+
+  /* ── Formatting ── */
+  function fmt(n) {
+    if (!isFinite(n)) return null;
+    const abs = Math.abs(n), sg = n < 0 ? '−' : '';
+    if (abs === 0) return '0';
+    if (abs < 0.001 && abs > 0) return sg + n.toExponential(4);
+    const T = [[1e15,'quadrillion'],[1e12,'trillion'],[1e9,'billion'],[1e6,'million'],[1e3,'thousand']];
+    for (const [v, nm] of T) {
+      if (abs >= v) {
+        const q = parseFloat((abs/v).toPrecision(6));
+        return sg + q.toLocaleString('en-NZ', {maximumFractionDigits:4}) + ' ' + nm;
+      }
+    }
+    return sg + abs.toLocaleString('en-NZ', {maximumFractionDigits:6});
+  }
+
+  // Returns the full integer/decimal numeral string for display as second line
+  function fmtNumeral(n) {
+    if (!isFinite(n)) return null;
+    const abs = Math.abs(n), sg = n < 0 ? '−' : '';
+    if (abs === 0) return '0';
+    // For very large numbers, use exponential notation
+    if (abs >= 1e18) return sg + abs.toExponential(4).replace('e+', ' × 10^');
+    // Otherwise show full integer if it's a whole number, else round sensibly
+    if (Number.isInteger(abs)) return sg + abs.toLocaleString('en-NZ');
+    // Non-integer: show up to 6 sig figs
+    const rounded = parseFloat(abs.toPrecision(8));
+    return sg + rounded.toLocaleString('en-NZ', {maximumFractionDigits: 6});
+  }
+
+  function fmtFull(n) {
+    if (!isFinite(n)) return null;
+    const abs = Math.abs(n), sg = n < 0 ? '−' : '';
+    if (abs === 0) return '0';
+    const T = [[1e15,'quadrillion'],[1e12,'trillion'],[1e9,'billion'],[1e6,'million']];
+    for (const [v, nm] of T) {
+      if (abs >= v) {
+        const q = parseFloat((abs/v).toPrecision(6));
+        const short = sg + q.toLocaleString('en-NZ',{maximumFractionDigits:4}) + ' ' + nm;
+        const long = sg + (abs >= 1e18 ? abs.toExponential(4) : abs.toLocaleString('en-NZ'));
+        return { short, long };
+      }
+    }
+    return { short: sg + abs.toLocaleString('en-NZ', {maximumFractionDigits:4}), long: null };
+  }
+
+  function readout(n) {
+    if (n === null) return '';
+    const abs = Math.abs(n), sg = n < 0 ? 'negative ' : '';
+    const T = [[1e15,'quadrillion'],[1e12,'trillion'],[1e9,'billion'],[1e6,'million'],[1e3,'thousand']];
+    for (const [v, nm] of T) {
+      if (abs >= v) {
+        const q = parseFloat((abs/v).toPrecision(4));
+        return '= ' + sg + q.toLocaleString('en-NZ',{maximumFractionDigits:3}) + ' ' + nm;
+      }
+    }
+    return '';
+  }
+
+  /* ── Anchor library ──────────────────────────────────────────────────
+     Flat list of pre-written, human-edited anchor facts.
+     Each entry: { value, emoji, label }
+       value  – verified real-world quantity
+       emoji  – visual hook
+       label  – plain description of what 'value' represents
+                written so it completes: "That's about X times [label]"
+                or for ratio≈1: "That's roughly [label]"
+     Selector finds the anchor giving the cleanest ratio (ideally 1–50×).
+     The output sentence is always assembled by the selector — never by the anchor.
+  ──────────────────────────────────────────────────────────────────── */
+
+  // ── Helper formatters (needed before ANCHORS is defined) ──
+  function fmtN(x) { return fmt(x) || x.toLocaleString('en-NZ'); }
+  function cleanR(r) {
+    // Returns a clean ratio string, e.g. "about 3×" or "roughly half"
+    if (r < 0.55) return null; // too small to say meaningfully
+    if (r > 500)  return null; // too large to say meaningfully
+    if (r < 0.75) return 'just over half';
+    if (r < 0.95) return `about ${Math.round(r*10)/10}×`;
+    if (r < 1.08) return null; // ≈1, handled separately as "roughly"
+    if (r < 1.5)  return 'just over once';
+    if (r < 2.5)  return `about ${Math.round(r)}×`;
+    if (r < 10)   return `about ${parseFloat(r.toFixed(1))}×`;
+    if (r < 100)  return `about ${Math.round(r)}×`;
+    return `about ${Math.round(r/10)*10}×`; // round to nearest 10
+  }
+
+  const ANCHORS = [
+
+    // ── TINY / COUNTABLE ──────────────────────────────────────────────
+    // Things you can hold, touch, or easily visualise
+
+    { value: 100,     emoji: '💵', label: 'the number of $1 bills in a thin stack you could hold in one hand (a $100 note is about 1 cm thick)' },
+    { value: 52,      emoji: '🃏', label: 'the number of cards in a standard deck' },
+    { value: 88,      emoji: '🎹', label: 'the number of keys on a standard piano keyboard' },
+    { value: 365,     emoji: '📅', label: 'the number of days in a year' },
+    { value: 1000,    emoji: '💵', label: 'the number of $1 bills in a stack roughly 10 cm tall' },
+
+    // ── TENS OF THOUSANDS ─────────────────────────────────────────────
+
+    { value: 1e4,     emoji: '🏘️',  label: 'the number of people in a small New Zealand town like Raglan or Matamata' },
+    { value: 3e4,     emoji: '🏟️',  label: 'the crowd at a sold-out test match at Wellington\'s Sky Stadium (capacity ~34,500)' },
+    { value: 5e4,     emoji: '🏉',  label: 'a capacity crowd at Eden Park in Auckland (~50,000 seats)' },
+    { value: 8e4,     emoji: '🎸',  label: 'the audience at a large outdoor music festival like Glastonbury\'s main stage (~80,000 people)' },
+
+    // ── HUNDREDS OF THOUSANDS ─────────────────────────────────────────
+
+    { value: 1e5,     emoji: '🏏',  label: 'a full house at the MCG in Melbourne — Australia\'s largest stadium (100,000 people)' },
+    { value: 2.16e5,  emoji: '🏙️',  label: 'the population of Wellington, New Zealand\'s capital city' },
+    { value: 4e5,     emoji: '🏙️',  label: 'the population of Christchurch — New Zealand\'s second largest city' },
+    { value: 5e5,     emoji: '📖',  label: 'the total word count of the entire Lord of the Rings trilogy' },
+    { value: 6e5,     emoji: '💵',  label: 'a stack of 600,000 $1 bills — laid flat, they\'d cover a standard tennis court' },
+
+    // ── MILLIONS ──────────────────────────────────────────────────────
+
+    { value: 1e6,     emoji: '🧂',  label: 'the approximate number of grains of salt in a full 1 kg bag of table salt' },
+    { value: 1.2e6,   emoji: '🏠',  label: 'the cost in dollars of an average house in Auckland (around $1.2 million in 2024)' },
+    { value: 2e6,     emoji: '🏖️',  label: 'the approximate number of grains of sand in a standard bucket (12 litre bucket)' },
+    { value: 2.5e6,   emoji: '🍺',  label: 'the number of pints of beer poured in Greater London\'s pubs on a single Friday night' },
+    { value: 5.1e6,   emoji: '🇳🇿', label: 'the entire population of New Zealand' },
+    { value: 6.5e6,   emoji: '🚶',  label: 'the number of steps it takes to walk across Australia, from Perth to Sydney' },
+    { value: 1e7,     emoji: '🧱',  label: 'the number of bricks used to construct the Empire State Building' },
+    { value: 1.5e7,   emoji: '🥐',  label: 'the number of croissants eaten across France every single day' },
+    { value: 3.8e7,   emoji: '🏙️',  label: 'the population of greater Tokyo — the world\'s largest metropolitan area' },
+    { value: 5e7,     emoji: '💵',  label: 'a stack of 50 million $1 bills — at 0.1mm each, that\'s a pile 5 km tall' },
+    { value: 6.7e7,   emoji: '🇬🇧', label: 'the population of the United Kingdom' },
+
+    // ── HUNDREDS OF MILLIONS ──────────────────────────────────────────
+
+    { value: 1e8,     emoji: '🍕',  label: 'the number of pizza slices eaten across the United States every single day' },
+    { value: 1e8,     emoji: '🏖️',  label: 'the approximate number of grains of sand in a standard bathtub filled to the brim' },
+    { value: 1.3e8,   emoji: '🍺',  label: 'the total number of pints poured in Greater London\'s pubs in an entire year' },
+    { value: 2.16e8,  emoji: '👣',  label: 'the total number of steps an average person walks across their entire lifetime' },
+    { value: 3.35e8,  emoji: '🇺🇸', label: 'the population of the United States of America' },
+    { value: 5e8,     emoji: '🏊',  label: 'the number of teaspoons of water it would take to empty an Olympic swimming pool' },
+    { value: 5e8,     emoji: '💵',  label: 'a stack of 500 million $1 bills — laid flat end-to-end, they\'d stretch from Auckland to Christchurch and back' },
+    { value: 8e8,     emoji: '🏖️',  label: 'the approximate number of grains of sand on a typical 1 km stretch of Piha Beach, to a depth of 1 metre' },
+
+    // ── BILLIONS ──────────────────────────────────────────────────────
+
+    { value: 1e9,     emoji: '⏱️',  label: 'the number of seconds in just under 32 years — if you counted one per second non-stop, you\'d finish in 2058' },
+    { value: 1.26e9,  emoji: '🎹',  label: 'the total number of individual notes played by a concert pianist practising 4 hours a day across a 50-year career' },
+    { value: 2.25e9,  emoji: '☕',  label: 'the number of cups of coffee drunk worldwide every single day' },
+    { value: 2.5e9,   emoji: '❤️',  label: 'the total number of times a human heart beats across an average lifetime' },
+    { value: 4e9,     emoji: '💵',  label: 'a stack of 4 billion $1 bills — tall enough to reach the International Space Station and back, twice' },
+    { value: 5e9,     emoji: '🏖️',  label: 'the approximate number of grains of sand on the entire Ninety Mile Beach in Northland, New Zealand' },
+    { value: 8.1e9,   emoji: '🌍',  label: 'the total number of human beings currently alive on Earth' },
+
+    // ── TENS OF BILLIONS ──────────────────────────────────────────────
+
+    { value: 1.4e10,  emoji: '▶️',  label: 'the total number of views on "Baby Shark" — the most-watched YouTube video ever made' },
+    { value: 3.7e10,  emoji: '🧠',  label: 'the number of neurons in the brain of a cat' },
+    { value: 4.32e10, emoji: '🏛️',  label: 'the number of seconds that have passed since the founding of Rome in 753 BC' },
+    { value: 5e10,    emoji: '💵',  label: 'a stack of 50 billion $1 bills — it would reach the Moon and still have change' },
+
+    // ── HUNDREDS OF BILLIONS ──────────────────────────────────────────
+
+    { value: 1e11,    emoji: '🧠',  label: 'the number of neurons in a single human brain' },
+    { value: 1e11,    emoji: '⭐',  label: 'the number of stars in a smallish galaxy (our Milky Way has about 250 billion)' },
+    { value: 5e11,    emoji: '🏖️',  label: 'the estimated number of grains of sand on Bondi Beach in Sydney' },
+    { value: 5e11,    emoji: '💵',  label: 'a stack of 500 billion $1 bills — it would stretch from Earth to the Moon and back, roughly 65 times' },
+
+    // ── TRILLIONS ─────────────────────────────────────────────────────
+
+    { value: 1e12,    emoji: '⏱️',  label: 'the number of seconds in 31,700 years — taking us back to when woolly mammoths roamed Europe and cave paintings were fresh' },
+    { value: 2.5e11,  emoji: '⭐',  label: 'the estimated number of stars in the Milky Way galaxy' },
+    { value: 3e12,    emoji: '🌳',  label: 'the estimated total number of trees currently standing on Earth' },
+    { value: 3.844e12,emoji: '🌕',  label: 'the number of A4 sheets of paper you\'d need to stack from the ground to reach the Moon' },
+    { value: 7.8e12,  emoji: '💵',  label: 'the total value in dollars of all the physical US currency in circulation in the world' },
+
+    // ── TENS OF TRILLIONS ─────────────────────────────────────────────
+
+    { value: 3.7e13,  emoji: '🔬',  label: 'the number of individual cells in a single human body' },
+    { value: 3.5e13,  emoji: '💵',  label: 'the US national debt in dollars (as of 2024)' },
+
+    // ── QUADRILLIONS ──────────────────────────────────────────────────
+
+    { value: 9.461e15,emoji: '✨',  label: 'the number of metres in one light-year — the distance light travels in a year at 300,000 km per second' },
+    { value: 2e15,    emoji: '🏖️',  label: 'the estimated number of grains of sand on all of Australia\'s beaches combined' },
+
+    // ── QUINTILLIONS ──────────────────────────────────────────────────
+
+    { value: 7.5e18,  emoji: '🏖️',  label: 'the estimated total number of grains of sand on every beach on Earth' },
+
+    // ── BEYOND ────────────────────────────────────────────────────────
+
+    { value: 7e27,    emoji: '⚛️',  label: 'the number of atoms in a single human body' },
+    { value: 1e80,    emoji: '🌌',  label: 'the estimated total number of atoms in the entire observable universe' },
+
+  ];
+
+  /* ── getCtx: clean ratio-based selector ─────────────────────────────
+     Scans all anchors. For each, computes ratio = abs / anchor.value.
+     Only considers ratios in [0.5, 50] — the "sweet spot" where the
+     comparison is surprising but not absurd.
+     Picks the anchor with the cleanest (most round) ratio in that range.
+     Sentence is always one of two fixed templates — no branching logic.
+  ──────────────────────────────────────────────────────────────────── */
+  function getCtx(n) {
+    const abs = Math.abs(n);
+    if (!isFinite(abs) || abs < 1e4) return null;
+
+    // Only ratios in this window produce natural-sounding sentences
+    const MIN_RATIO = 0.5;
+    const MAX_RATIO = 50;
+
+    let best = null;
+    let bestScore = -Infinity;
+
+    for (const a of ANCHORS) {
+      const r = abs / a.value;
+      if (r < MIN_RATIO || r > MAX_RATIO) continue;
+
+      // Score by how close the ratio is to a clean round number (1, 2, 5, 10, 20, 50)
+      // and prefer ratios ≥ 1 (feels more impressive)
+      const cleanTargets = [0.5, 1, 2, 3, 5, 10, 20, 25, 50];
+      const closeness = Math.min(...cleanTargets.map(t => Math.abs(Math.log2(r) - Math.log2(t))));
+      let score = 10 - closeness * 3;
+      if (r >= 1) score += 2; // slight preference for "X times" over "fraction of"
+
+      if (score > bestScore) {
+        bestScore = score;
+        best = { ratio: r, anchor: a };
+      }    }
+
+    if (!best) return null;
+
+    const { ratio: r, anchor: a } = best;
+
+    // Build sentence from two fixed templates — no maths inside the label itself
+    let sentence;
+    if (r >= 0.9 && r <= 1.15) {
+      // Close enough to call "roughly the same as"
+      sentence = `That's roughly the same as ${a.label}.`;
+    } else if (r < 1) {
+      // Fraction — e.g. "about half of [label]"
+      const frac = r >= 0.65 ? 'about two-thirds of' : r >= 0.45 ? 'about half of' : `about ${Math.round(r*100)}% of`;
+      sentence = `That's ${frac} ${a.label}.`;
+    } else {
+      // Multiple — e.g. "about 3× [label]"
+      let mult;
+      if (r < 1.3)       mult = 'just over';
+      else if (r < 1.7)  mult = 'about 1.5 times';
+      else if (r < 2.3)  mult = 'about twice';
+      else if (r < 2.8)  mult = 'about 2.5 times';
+      else if (r < 3.5)  mult = 'about 3 times';
+      else if (r < 4.5)  mult = 'about 4 times';
+      else if (r < 6)    mult = 'about 5 times';
+      else if (r < 8)    mult = 'about 7 times';
+      else if (r < 12)   mult = 'about 10 times';
+      else if (r < 18)   mult = 'about 15 times';
+      else if (r < 28)   mult = 'about 20 times';
+      else if (r < 40)   mult = 'about 30 times';
+      else               mult = 'about 50 times';
+      sentence = `That's ${mult} ${a.label}.`;
+    }
+
+    return { emoji: a.emoji, text: sentence, ps: a.ps || getScalePs(abs) };
+  }
+
+  /* ── Scale-based P.S. notes ─────────────────────────────────────────
+     Fired by magnitude of the result, independent of which anchor was chosen.
+     Each gives a scale-bridge that reframes a poorly-intuited reference point.
+  ──────────────────────────────────────────────────────────────────── */
+  function getScalePs(x) {
+    if (x < 1e4)   return null;
+
+    // Tens / hundreds of billions — deep historical time
+    if (x >= 2e10 && x < 1e12)
+      return 'P.S. Numbers in the tens of billions are hard to picture in time. If you counted one number per second without stopping — no sleep, no breaks — counting to 50 billion would take about 1,600 years, finishing somewhere around the year 3600.';
+
+    // Trillions — Moon distance territory
+    if (x >= 1e12 && x < 1e15)
+      return 'P.S. The Moon is further away than most people picture. If you shrunk the Earth to the size of a basketball, the Moon would be a baseball sitting about 7 metres away — not floating just overhead, but across the room.';
+
+    // Quadrillions — light-year territory
+    if (x >= 1e15 && x < 1e18)
+      return 'P.S. A light-year sounds concrete, but it isn\'t felt. If the Sun were a grain of sand in your palm, the nearest star would be another grain of sand 4.3 km away — and the space between them, mostly vacuum, is one light-year.';
+
+    // Quintillions — all Earth\'s sand territory
+    if (x >= 1e18 && x < 1e24)
+      return 'P.S. Even "all the sand on Earth" undersells the scale here. There are more atoms in a single teaspoon of water (~10²³) than there are grains of sand on every beach on Earth (~10¹⁹). Big numbers make other big numbers look small.';
+
+    // 10²⁴ and beyond — atomic / cosmic
+    if (x >= 1e24)
+      return 'P.S. At this scale, familiar comparisons break down entirely. If an atom were the size of a marble, a marble would be roughly the size of the Earth. The observable universe contains an estimated 10⁸⁰ atoms — a number so large it exists only in mathematics, with nothing physical left to count.';
+
+    return null;
+  }
+
+  /* ── Effective value from input + dropdown ── */
+  function effectiveVal(inputId, selectId) {
+    const raw = parseNum(document.getElementById(inputId).value);
+    if (raw === null) return null;
+    const scale = parseFloat(document.getElementById(selectId).value);
+    const inputStr = document.getElementById(inputId).value.trim();
+    const hasWord = /[a-z]/i.test(inputStr.replace(/[0-9.,+\-\s]/g,''));
+    const effectiveScale = hasWord ? 1 : scale;
+    return raw * effectiveScale;
+  }
+
+  /* ── Update readouts ── */
+  function setReadout(id, v) {
+    const el = document.getElementById(id);
+    if (v === null) { el.textContent = ''; return; }
+    el.textContent = readout(v) || '';
+  }
+
+  /* ── Main calc ── */
+  let op = '×';
+
+  function calc() {
+    const v1 = effectiveVal('n1', 's1');
+    const v2 = effectiveVal('n2', 's2');
+    const err = document.getElementById('err');
+
+    setReadout('r1', v1);
+    setReadout('r2', v2);
+
+    const resNum = document.getElementById('res-num');
+    const resWords = document.getElementById('res-words');
+
+    if (v1 === null && v2 === null) {
+      resNum.className = 'result-placeholder';
+      resNum.textContent = '—';
+      resWords.textContent = '';
+      setCtx(null);
+      err.textContent = '';
+      return;
+    }
+    if (v1 === null || v2 === null) {
+      resNum.className = 'result-placeholder';
+      resNum.textContent = '—';
+      resWords.textContent = '';
+      err.textContent = '';
+      return;
+    }
+
+    err.textContent = '';
+    let r;
+    let percentageMode = false;
+    let pctValue, pctOf;
+
+    if (op === '×') r = v1 * v2;
+    else if (op === '÷') {
+      if (v2 === 0) { err.textContent = 'Cannot divide by zero.'; return; }
+      r = v1 / v2;
+    }
+    else if (op === '+') r = v1 + v2;
+    else if (op === '−') r = v1 - v2;
+    else if (op === '%') {
+      percentageMode = true;
+      pctValue = v1;   // the percentage figure (e.g. 1.25)
+      pctOf = v2;      // the number to take it of (e.g. 16 billion)
+      r = (v1 / 100) * v2;
+    }
+
+    // Line 1: human-friendly (e.g. "28 billion")
+    const friendly = fmt(r);
+    // Line 2: full numerals or percentage description
+    const numeral = fmtNumeral(r);
+
+    resNum.className = 'result-number';
+    resNum.textContent = friendly || numeral || '—';
+
+    if (percentageMode) {
+      // Show descriptive second line: "1.25% of 16 billion = ..."
+      const ofFriendly = fmt(pctOf) || fmtNumeral(pctOf);
+      resWords.textContent = `${fmtNumeral(r)} (${pctValue}% of ${ofFriendly})`;
+    } else {
+      const showNumeral = numeral && friendly && friendly !== numeral;
+      resWords.textContent = showNumeral ? numeral : '';
+    }
+
+    setCtx(r);
+  }
+
+  function setCtx(n) {
+    const dot = document.getElementById('ctx-dot');
+    const el = document.getElementById('ctx-text');
+    if (n === null) {
+      el.innerHTML = '<span class="ctx-empty">Enter numbers above to see a real-world comparison.</span>';
+      dot.classList.remove('live');
+      return;
+    }
+    const item = getCtx(n);
+    if (item) {
+      const ps = item.ps
+        ? `<div class="ctx-ps">${item.ps}</div>`
+        : '';
+      el.innerHTML = `<div><span class="ctx-emoji">${item.emoji}</span> ${item.text}</div>${ps}`;
+      dot.classList.add('live');
+    } else {
+      el.innerHTML = '<span class="ctx-empty">Context available for numbers 10,000 and above.</span>';
+      dot.classList.remove('live');
+    }
+  }
+
+  /* ── Op buttons ── */
+  const opMap = { '×': 'bm', '÷': 'bd', '+': 'ba', '−': 'bs', '%': 'bp' };
+  Object.entries(opMap).forEach(([sym, id]) => {
+    document.getElementById(id).addEventListener('click', () => {
+      op = sym;
+      Object.values(opMap).forEach(bid => {
+        document.getElementById(bid).classList.remove('selected');
+        document.getElementById(bid).setAttribute('aria-pressed', 'false');
+      });
+      document.getElementById(id).classList.add('selected');
+      document.getElementById(id).setAttribute('aria-pressed', 'true');
+      // Update placeholder labels
+      updateLabels();
+      calc();
+    });
+  });
+
+  function updateLabels() {
+    const l1 = document.querySelector('label[for="n1"]');
+    const l2 = document.querySelector('label[for="n2"]');
+    const p1 = document.getElementById('n1');
+    const p2 = document.getElementById('n2');
+    if (op === '%') {
+      l1.textContent = 'Percentage';
+      l2.textContent = 'Of this number';
+      p1.placeholder = 'e.g. 1.25';
+      p2.placeholder = 'e.g. 16 billion';
+    } else {
+      l1.textContent = 'First number';
+      l2.textContent = 'Second number';
+      p1.placeholder = 'e.g. 7.8 or "5 million"';
+      p2.placeholder = 'e.g. 52 or "3 trillion"';
+    }
+  }
+
+  ['n1','n2','s1','s2'].forEach(id => document.getElementById(id).addEventListener('input', calc));
+  ['n1','n2','s1','s2'].forEach(id => document.getElementById(id).addEventListener('change', calc));
+
+  /* ── Snap / simplify box ── */
+  document.getElementById('snap').addEventListener('input', function () {
+    const v = parseNum(this.value);
+    const el = document.getElementById('snap-rd');
+    if (v === null) { el.innerHTML = ''; return; }
+    const f = fmtFull(v);
+    if (!f) { el.innerHTML = ''; return; }
+    let html = `<span class="big">${f.short}</span>`;
+    if (f.long && f.long !== f.short) {
+      html += `<div class="full">${f.long}</div>`;
+    }
+    el.innerHTML = html;
+  });
+
+})();
+</script>
+</body>
+</html>
