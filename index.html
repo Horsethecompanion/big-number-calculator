@@ -724,22 +724,7 @@ footer a:hover { color: var(--text-light); }
       sentence = `That's ${mult} ${a.label}.`;
     }
 
-    return { emoji: a.emoji, text: sentence, ps: a.ps || getScalePs(abs) };
-  }
-
-  /* ── Scale-based P.S. notes ─────────────────────────────────────────
-     Fired by magnitude of the result, independent of which anchor was chosen.
-     Each gives a scale-bridge that reframes a poorly-intuited reference point.
-  ──────────────────────────────────────────────────────────────────── */
-  function getScalePs(x) {
-    // Only fire for quadrillions+ where any anchor is poorly intuited
-    if (x >= 1e15 && x < 1e18)
-      return 'P.S. A light-year sounds concrete but isn\'t felt. If the Sun were a grain of sand in your palm, the nearest star would be another grain of sand 4.3 km away — and the distance between them is one light-year.';
-    if (x >= 1e18 && x < 1e24)
-      return 'P.S. Even "all the sand on Earth" undersells the scale here. There are more atoms in a single teaspoon of water (~10²³) than grains of sand on every beach on Earth (~10¹⁹). Big numbers have a way of making other big numbers look small.';
-    if (x >= 1e24)
-      return 'P.S. At this scale, familiar comparisons break down entirely. If an atom were the size of a marble, a marble would be roughly the size of the Earth. The observable universe contains an estimated 10⁸⁰ atoms — a number so large it exists only in mathematics.';
-    return null;
+    return { emoji: a.emoji, text: sentence, ps: a.ps || null };
   }
 
   /* ── Effective value from input + dropdown ── */
