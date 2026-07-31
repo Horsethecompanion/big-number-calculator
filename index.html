@@ -6,22 +6,13 @@
 <title>Big Number Calculator</title>
 <meta name="description" content="Calculate and contextualise big numbers with human-scale comparisons.">
 <meta name="theme-color" content="#0f172a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Big Numbers">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>">
-<link rel="manifest" href="data:application/json,{
-  &quot;name&quot;: &quot;Big Number Calculator&quot;,
-  &quot;short_name&quot;: &quot;Big Numbers&quot;,
-  &quot;description&quot;: &quot;Calculate and contextualise big numbers with human-scale comparisons.&quot;,
-  &quot;start_url&quot;: &quot;.&quot;,
-  &quot;display&quot;: &quot;standalone&quot;,
-  &quot;background_color&quot;: &quot;#f8fafc&quot;,
-  &quot;theme_color&quot;: &quot;#0f172a&quot;,
-  &quot;icons&quot;: [{
-    &quot;src&quot;: &quot;data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>&quot;,
-    &quot;sizes&quot;: &quot;any&quot;,
-    &quot;type&quot;: &quot;image/svg+xml&quot;
-  }]
-}">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="manifest" href="manifest.json">
 <style>
 :root {
   --bg: #f8fafc;
@@ -442,6 +433,9 @@ footer a:hover { color: var(--text-light); }
     </div>
   </div>
 
+  <div style="text-align:center; padding: 0.5rem 0 1.5rem;">
+    <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="horsethecompanion" data-color="#1772e8" data-emoji="😻" data-font="Poppins" data-text="Buy me a coffee" data-outline-color="#ffffff" data-font-color="#ffffff" data-coffee-color="#FFDD00"></script>
+  </div>
   <footer>
     <a href="https://horsethecompanion.github.io">horsethecompanion.github.io</a>
   </footer>
@@ -906,16 +900,9 @@ footer a:hover { color: var(--text-light); }
 
 })();
 
-// ── PWA service worker (inline blob) ──
+// ── PWA service worker ──
 if ('serviceWorker' in navigator) {
-  const swCode = `
-    self.addEventListener('install', e => self.skipWaiting());
-    self.addEventListener('activate', e => self.clients.claim());
-    self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
-  `;
-  const swBlob = new Blob([swCode], { type: 'application/javascript' });
-  const swUrl  = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl).catch(() => {});
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 </script>
 </body>
